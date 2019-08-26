@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Platform } from "react-native";
+import { StyleSheet, Text, View, Platform, AppRegistry, Button } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import firebase from 'react-native-firebase';
 import { TouchableOpacity, FlatList, TextInput } from 'react-native-gesture-handler';
@@ -7,6 +7,7 @@ import { TouchableOpacity, FlatList, TextInput } from 'react-native-gesture-hand
 export default class SignupTab extends Component {
   constructor(props) {
     super(props);
+    this.unsubcriber=null;
     this.state = {
       users: [],
       newUserName: "",
@@ -14,9 +15,12 @@ export default class SignupTab extends Component {
       newUserGender: "",
       newUserEmail: "",
       newUserPassword: "",
-      loading: false
+      loading: false,
+      typedEmail: "",
+      typedPassword: "",
+      user: null
     };
-
+    console.log(firebase.auth());
     this.iosConfig={
         clientId:'377234939500-bea9c5sovr8b5poqi471f2i1s22u3dhl.apps.googleusercontent.com',
         appId:'1:377234939500:ios:8212c3f2fc453646',
@@ -32,7 +36,7 @@ export default class SignupTab extends Component {
     };
     
     this.userApp = firebase.initializeApp(
-      Platform.OS === 'ios' ? this.iosConfig : this.androidConfig,'userApp'
+      Platform.OS === 'ios' ? this.iosConfig : this.androidConfig
     );
 
     this.rootRef = firebase.database().ref();
@@ -54,6 +58,18 @@ export default class SignupTab extends Component {
     } else if (this.state.newUserPassword.trim() === "") {
       alert("User password is blank");
     } else {
+      firebase.auth().createUserWithEmailAndPassword(
+        this.state.typedEmail,
+        this.state.typedPassword
+      ).then((loggedInUser) => {
+        this.setState({user:loggedInUser});
+        console.log(
+          `Register with user: ${JSON.stringify(loggedInUser.toJSON())}`
+        );
+      })
+      .catch((error) => {
+        console.log("Register fail");
+      })
       this.userRef.push({
         userName: this.state.newUserName,
         userGender: this.state.newUserGender,
@@ -61,6 +77,7 @@ export default class SignupTab extends Component {
         userEmail: this.state.newUserEmail,
         userPassword: this.state.newUserPassword
       })
+      
       this.props.navigation.navigate("Login");
     }
   };
@@ -124,9 +141,10 @@ export default class SignupTab extends Component {
               keyboardType="email-address"
               placeholder="Enter your email"
               autoCapitalize="none"
-              onChangeText={text => {
+              onChangeText={(text) => {
                 this.setState({
-                  newUserEmail: text
+                  newUserEmail: text,
+                  typedEmail: text
                 });
               }}
               value={this.state.newUserEmail}
@@ -140,9 +158,10 @@ export default class SignupTab extends Component {
               secureTextEntry="true"
               placeholder="Enter your password"
               autoCapitalize="none"
-              onChangeText={text => {
+              onChangeText={(text)  => {
                 this.setState({
-                  newUserPassword: text
+                  newUserPassword: text,
+                  typedPassword: text
                 });
               }}
               value={this.state.newUserPassword}
@@ -150,12 +169,12 @@ export default class SignupTab extends Component {
           </View>
         </View>
         <View style={styles.containerDown}>
-          <TouchableOpacity
-            // onPress={() => this.props.navigation.navigate("Login")}
+          <Button style={styles.btnSignup}
             onPress={this.onPressAdd}
+            title="Sign up"
+            // onPress={this.onRegister}
           >
-            <Text style={styles.btnSignup}> Sign Up </Text>
-          </TouchableOpacity>
+          </Button>
         </View>
 
         <FlatList>
@@ -172,7 +191,8 @@ export default class SignupTab extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    borderRadius: Platform.OS === 'ios' ? 1 : 1
   },
   title: {
     textAlign: "center",

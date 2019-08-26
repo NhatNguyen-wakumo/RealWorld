@@ -1,9 +1,51 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, TextInput } from "react-native";
+import { StyleSheet, Text, View, TextInput, Platform, Button } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import firebase from 'react-native-firebase';
 
 export default class LoginTab extends Component {
+  
+  constructor(props){
+    super(props);
+    this.unsubcriber = null;
+    this.state={
+        typedEmail: '',
+        typedPassword: '',
+        user: null
+    }
+    this.iosConfig={
+      clientId:'377234939500-bea9c5sovr8b5poqi471f2i1s22u3dhl.apps.googleusercontent.com',
+      appId:'1:377234939500:ios:8212c3f2fc453646',
+      apiKey:'AIzaSyDqlgP9SJSrR83fuehoL51oMd9YRPbJI-8',
+      databaseURL:'https://realappwkm.firebaseio.com',
+      storageBucket:'realappwkm.appspot.com',
+      messagingSenderId:'377234939500',
+      projectId:'realappwkm',
+      persistance:true
+  };
+  this.androidConfig={
+    persistance:true
+  };
+  this.userApp = firebase.initializeApp(
+      Platform.OS === 'ios' ? this.iosConfig : this.androiConfig
+  )
+  }
+
+  onLogin = () => {
+      firebase.auth().signInWithEmailAndPassword(
+        this.setState.typedEmail,
+        this.setState.typedPassword
+      ).then(loggedInUser => {
+        this.props.navigation.navigate("Account");
+        console.log(
+          `Register with user: ${JSON.stringify(loggedInUser.toJSON)}`
+        );
+      }).catch(error => {
+        alert("Register fail")
+      })
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -21,6 +63,7 @@ export default class LoginTab extends Component {
                 typedEmail: text
               });
             }}
+            value={this.state.typedEmail}
           ></TextInput>
           <TextInput
             style={styles.inputs}
@@ -33,22 +76,22 @@ export default class LoginTab extends Component {
                 typedPassword: text
               });
             }}
+            value={this.state.typedPassword}
           ></TextInput>
         </View>
         <View style={styles.containerDown}>
           <View style={styles.btn}>
-            <TouchableOpacity style={styles.btnLogin}
-            onPress={() => this.props.navigation.navigate("Account")}>
-              <Text style={styles.btnText}>Login</Text>
-            </TouchableOpacity>
+            <Button style={styles.btnLogin}
+            onPress={this.onLogin}
+            title="Login">
+            </Button>
           </View>
           <View style={styles.btn}>
-            <TouchableOpacity
+            <Button
               style={styles.btnSignup}
               onPress={() => this.props.navigation.navigate("Signup")}
-            >
-              <Text style={styles.btnText}>Sign up</Text>
-            </TouchableOpacity>
+              title="Sign up">
+            </Button>
           </View>
         </View>
       </View>
