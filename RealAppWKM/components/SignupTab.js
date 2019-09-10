@@ -1,13 +1,25 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Platform, AppRegistry, Button } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+  AppRegistry,
+  Button,
+  AsyncStorage
+} from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
-import firebase from 'react-native-firebase';
-import { TouchableOpacity, FlatList, TextInput } from 'react-native-gesture-handler';
+import firebase from "react-native-firebase";
+import {
+  TouchableOpacity,
+  FlatList,
+  TextInput
+} from "react-native-gesture-handler";
 
 export default class SignupTab extends Component {
   constructor(props) {
     super(props);
-    this.unsubcriber=null;
+    this.unsubscriber = null;
     this.state = {
       users: [],
       newUserName: "",
@@ -16,37 +28,29 @@ export default class SignupTab extends Component {
       newUserEmail: "",
       newUserPassword: "",
       loading: false,
+      user: null,
       typedEmail: "",
       typedPassword: "",
-      user: null
+      newResult: [],
+      emails: []
     };
+
     console.log(firebase.auth());
-    this.iosConfig={
-        clientId:'377234939500-bea9c5sovr8b5poqi471f2i1s22u3dhl.apps.googleusercontent.com',
-        appId:'1:377234939500:ios:8212c3f2fc453646',
-        apiKey:'AIzaSyDqlgP9SJSrR83fuehoL51oMd9YRPbJI-8',
-        databaseURL:'https://realappwkm.firebaseio.com',
-        storageBucket:'realappwkm.appspot.com',
-        messagingSenderId:'377234939500',
-        projectId:'realappwkm',
-        persistance:true
-    };
-    this.androidConfig={
-      persistance:true
-    };
-    
-    this.userApp = firebase.initializeApp(
-      Platform.OS === 'ios' ? this.iosConfig : this.androidConfig
-    );
 
     this.rootRef = firebase.database().ref();
     console.log(this.rootRef);
 
-    this.userRef = this.rootRef.child('user');
+    this.userRef = this.rootRef.child("users");
     console.log(this.userRef);
+
+    this.ref = firebase.firestore().collection("emails");
   }
 
-  onPressAdd = () => {
+  static navigationOptions = {
+    title: "Quick Sign Up"
+  };
+
+  onRegister = () => {
     if (this.state.newUserName.trim() === "") {
       alert("User name is blank");
     } else if (this.state.newUserGender.trim() === "") {
@@ -58,80 +62,107 @@ export default class SignupTab extends Component {
     } else if (this.state.newUserPassword.trim() === "") {
       alert("User password is blank");
     } else {
-      firebase.auth().createUserWithEmailAndPassword(
-        this.state.typedEmail,
-        this.state.typedPassword
-      ).then((loggedInUser) => {
-        this.setState({user:loggedInUser});
-        console.log(
-          `Register with user: ${JSON.stringify(loggedInUser.toJSON())}`
-        );
-      })
-      .catch((error) => {
-        console.log("Register fail");
-      })
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(
+          this.state.typedEmail,
+          this.state.typedPassword
+        )
+        .then(loggedInUser => {
+          this.setState({ user: loggedInUser });
+          alert(`Register successfully`);
+        })
+        .then(() => {
+          this.props.navigation.navigate("Login");
+        })
+        .catch(error => {
+          console.log("error", error);
+        });
+      this.ref
+        .add({
+          newEmail: this.state.typedEmail,
+          newPassword: this.state.typedPassword,
+          newFullName: this.state.newUserName,
+          newNickname: this.state.newUserGender,
+          newPhone: this.state.newUserAge
+        })
+        .then(data => {
+          console.log(`added data= ${data}`);
+          this.setState({
+            typedEmail: "",
+            typedPassword: "",
+            newUserName: "",
+            newUserGender: "",
+            loading: true
+          });
+        })
+        .catch(error => {
+          console.log(`error: ${error}`);
+          this.setState({
+            typedEmail: "",
+            typedPassword: "",
+            newUserName: "",
+            newUserGender: "",
+            loading: true
+          });
+        });
       this.userRef.push({
-        userName: this.state.newUserName,
-        userGender: this.state.newUserGender,
-        userAge: this.state.newUserAge,
+        userFullName: this.state.newUserName,
+        userNickName: this.state.newUserGender,
+        userPhone: this.state.newUserAge,
         userEmail: this.state.newUserEmail,
         userPassword: this.state.newUserPassword
-      })
-      
+      });
       this.props.navigation.navigate("Login");
     }
   };
 
   render() {
+    const { navigate } = this.props.navigation;
     return (
-     
       <View style={styles.container}>
-        <View style={styles.containerUp}>
-          <Text style={styles.title}>Quick Sign Up</Text>
-        </View>
+        <View style={styles.containerUp}></View>
         <View style={styles.containerMid}>
           <View style={styles.subContainerMid}>
-            <Text style={styles.inputsText}>Your Name</Text>
+            <Text style={styles.inputsText}>Your Full Name</Text>
             <TextInput
               style={styles.inputs}
               keyboardType="default"
-              placeholder="Enter your name"
+              placeholder="Enter your full name"
               autoCapitalize="none"
               onChangeText={text => {
                 this.setState({
                   newUserName: text
                 });
               }}
-              />
+            />
           </View>
           <View style={styles.subContainerMid}>
-            <Text style={styles.inputsText}>Your Gender</Text>
+            <Text style={styles.inputsText}>Your Nickname</Text>
             <TextInput
               style={styles.inputs}
               keyboardType="default"
-              placeholder="Enter your gender"
+              placeholder="Enter your nickname"
               autoCapitalize="none"
               onChangeText={text => {
                 this.setState({
                   newUserGender: text
                 });
               }}
-              value={this.state.newUserGender}
             ></TextInput>
           </View>
           <View style={styles.subContainerMid}>
-            <Text style={styles.inputsText}>Your Age</Text>
+            <Text style={styles.inputsText}>Your Phone</Text>
             <TextInput
               style={styles.inputs}
               keyboardType="default"
-              placeholder="Enter your age"
+              placeholder="Enter your phone number"
               autoCapitalize="none"
               onChangeText={text => {
                 this.setState({
                   newUserAge: text
                 });
               }}
-              value={this.state.newUserAge}
             ></TextInput>
           </View>
           <View style={styles.subContainerMid}>
@@ -141,13 +172,12 @@ export default class SignupTab extends Component {
               keyboardType="email-address"
               placeholder="Enter your email"
               autoCapitalize="none"
-              onChangeText={(text) => {
+              onChangeText={text =>
                 this.setState({
                   newUserEmail: text,
                   typedEmail: text
-                });
-              }}
-              value={this.state.newUserEmail}
+                })
+              }
             ></TextInput>
           </View>
           <View style={styles.subContainerMid}>
@@ -158,32 +188,22 @@ export default class SignupTab extends Component {
               secureTextEntry="true"
               placeholder="Enter your password"
               autoCapitalize="none"
-              onChangeText={(text)  => {
+              onChangeText={text => {
                 this.setState({
                   newUserPassword: text,
                   typedPassword: text
                 });
               }}
-              value={this.state.newUserPassword}
             ></TextInput>
           </View>
         </View>
         <View style={styles.containerDown}>
-          <Button style={styles.btnSignup}
-            onPress={this.onPressAdd}
-            title="Sign up"
-            // onPress={this.onRegister}
-          >
-          </Button>
+          <Button
+            style={styles.btnSignup}
+            onPress={this.onRegister}
+            title="Register"
+          ></Button>
         </View>
-
-        <FlatList>
-          data={this.state.users}
-          renderItem=
-          {({ item, index }) => {
-            return <Text style={styles.dataText}>{item.userName}</Text>;
-          }}
-        </FlatList>
       </View>
     );
   }
@@ -192,7 +212,7 @@ export default class SignupTab extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderRadius: Platform.OS === 'ios' ? 1 : 1
+    borderRadius: Platform.OS === "ios" ? 1 : 1
   },
   title: {
     textAlign: "center",
@@ -218,6 +238,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: 250,
     height: 35
+  },
+  radio: {
+    marginTop: 15
   },
   containerDown: {
     alignItems: "center",

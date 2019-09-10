@@ -4,46 +4,50 @@ import {
   Text,
   View,
   TextInput,
-  Button,
-  FlatList,
+  Platform,
   AsyncStorage,
+  Button,
   ImageBackground
 } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import Firebase from "react-native-firebase";
+import {
+  TouchableOpacity,
+  FlatList,
+  ScrollView
+} from "react-native-gesture-handler";
+import firebase from "react-native-firebase";
+import { navigate } from "react-navigation";
 import { ChatLineHolder } from "./ChatLineHolder";
 
-export default class ChatTab extends Component {
+export default class AccountTab extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      chatData: [],
-      chatInputContent: "",
-      username: ""
+      users: [],
+      newUserName: "",
+      newUserAge: "",
+      newUserGender: "",
+      newUserEmail: "",
+      newUserPassword: "",
+      loading: false,
+      user: null,
+      typedEmail: "",
+      results: [],
+      typedPassword: "",
+      emails: [],
+      newResult: [],
+      lists: []
     };
+    this.ref = firebase.firestore().collection("emails");
   }
+
   static navigationOptions = {
-    title: "Chat Room"
+    title: "Messenger"
   };
-  async componentDidMount() {
-    let username = await AsyncStorage.getItem("name");
-    this.setState({ username });
-    firebase
-      .database()
-      .ref("/chatTab")
-      .on("value", snapshot => {
-        if (snapshot.val() !== undefined && snapshot.val() !== null) {
-          this.setState({
-            chatData: Object.values(snapshot.val())
-          });
-        }
-      });
-  }
 
   _sendMessage = () => {
-    Firebase.database()
+    firebase
+      .database()
       .ref("/chatTab")
       .push({
         userName: this.state.username,

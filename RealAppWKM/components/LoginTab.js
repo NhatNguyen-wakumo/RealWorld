@@ -1,57 +1,66 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, TextInput, Platform, Button } from "react-native";
+import { StyleSheet, Text, View, TextInput, Button } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
+import { navigate } from "react-navigation";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import firebase from 'react-native-firebase';
+import firebase from "react-native-firebase";
 
 export default class LoginTab extends Component {
-  
-  constructor(props){
+  constructor(props) {
     super(props);
     this.unsubcriber = null;
-    this.state={
-        typedEmail: '',
-        typedPassword: '',
-        user: null
-    }
-    this.iosConfig={
-      clientId:'377234939500-bea9c5sovr8b5poqi471f2i1s22u3dhl.apps.googleusercontent.com',
-      appId:'1:377234939500:ios:8212c3f2fc453646',
-      apiKey:'AIzaSyDqlgP9SJSrR83fuehoL51oMd9YRPbJI-8',
-      databaseURL:'https://realappwkm.firebaseio.com',
-      storageBucket:'realappwkm.appspot.com',
-      messagingSenderId:'377234939500',
-      projectId:'realappwkm',
-      persistance:true
-  };
-  this.androidConfig={
-    persistance:true
-  };
-  this.userApp = firebase.initializeApp(
-      Platform.OS === 'ios' ? this.iosConfig : this.androiConfig
-  )
+    this.state = {
+      typedEmail: "thainguyen@wkm.vn",
+      typedPassword: "thainguyen",
+      user: null,
+      users: [],
+      newUserName: "",
+      newUserAge: "",
+      newUserGender: "",
+      newUserEmail: "",
+      newUserPassword: "",
+      loading: false,
+      newUserID: ""
+    };
   }
 
+  static navigationOptions = {
+    title: "Login with Firebase"
+  };
+
   onLogin = () => {
-      firebase.auth().signInWithEmailAndPassword(
-        this.setState.typedEmail,
-        this.setState.typedPassword
-      ).then(loggedInUser => {
-        this.props.navigation.navigate("Account");
-        console.log(
-          `Register with user: ${JSON.stringify(loggedInUser.toJSON)}`
-        );
-      }).catch(error => {
-        alert("Register fail")
-      })
-  }
+    if (this.state.typedEmail.trim() === "") {
+      alert("The email is blank");
+    } else if (this.state.typedPassword.trim() === "") {
+      alert("The password is blank");
+    } else {
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(
+          this.state.typedEmail,
+          this.state.typedPassword
+        )
+        .then(loggedInUser => {
+          alert(`Hi ${this.state.typedEmail}`);
+        })
+        .then(() => {
+          this.props.navigation.navigate("Account", {
+            email: this.state.typedEmail
+          });
+        })
+        .catch(error => {
+          alert(`${error}`);
+        });
+    }
+  };
 
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.containerUp}>
-          <Text style={styles.title}>Login with Firebase</Text>
+          <Text style={styles.title}></Text>
         </View>
+
         <View style={styles.containerMid}>
           <TextInput
             style={styles.inputs}
@@ -81,17 +90,18 @@ export default class LoginTab extends Component {
         </View>
         <View style={styles.containerDown}>
           <View style={styles.btn}>
-            <Button style={styles.btnLogin}
-            onPress={this.onLogin}
-            title="Login">
-            </Button>
+            <Button
+              style={styles.btnLogin}
+              onPress={this.onLogin}
+              title="Login"
+            ></Button>
           </View>
           <View style={styles.btn}>
             <Button
               style={styles.btnSignup}
               onPress={() => this.props.navigation.navigate("Signup")}
-              title="Sign up">
-            </Button>
+              title="Sign up"
+            ></Button>
           </View>
         </View>
       </View>

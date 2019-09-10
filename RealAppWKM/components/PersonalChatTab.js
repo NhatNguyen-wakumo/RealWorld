@@ -30,8 +30,7 @@ export default class ChatTab extends Component {
   async componentDidMount() {
     let username = await AsyncStorage.getItem("name");
     this.setState({ username });
-    firebase
-      .database()
+    Firebase.database()
       .ref("/chatTab")
       .on("value", snapshot => {
         if (snapshot.val() !== undefined && snapshot.val() !== null) {
