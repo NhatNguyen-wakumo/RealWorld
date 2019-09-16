@@ -97,11 +97,11 @@ export default class FriendAccountTab extends Component {
             return <Text styles={styles.dataText}>{item.email}</Text>;
           }}
         ></FlatList> */}
-        <Button
+        {/* <Button
           style={styles.btnSend}
           title="Send message"
           onPress={() => this.toChat()}
-        ></Button>
+        ></Button> */}
       </View>
     );
   }

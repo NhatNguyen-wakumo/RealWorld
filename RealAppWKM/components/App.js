@@ -14,7 +14,6 @@ import FriendTab from "./FriendTab";
 import ChatTab from "./ChatTab";
 import JoinTab from "./JoinTab";
 import firebase from "react-native-firebase";
-import TodoComponent from "../backend/TodoComponent";
 import FriendAccountTab from "./FriendAccountTab";
 import PersonalChatTab from "./PersonalChatTab";
 import ChatListTab from "./ChatListTab";
@@ -23,19 +22,18 @@ import MessTab from "./MessTab";
 const AppNavigator = createStackNavigator(
   {
     // Todo: TodoComponent,
-    ChatList: ChatListTab,
+    // PickImage: PickImageTab,
     Login: LoginTab,
     Signup: SignupTab,
     Account: AccountTab,
     Update: UpdateTab,
     Join: JoinTab,
-
     Account: AccountTab,
     Chat: ChatTab,
     FriendAccount: FriendAccountTab,
     Friend: FriendTab,
     PersonalChat: PersonalChatTab,
-
+    ChatList: ChatListTab,
     Mess: MessTab
   },
   {

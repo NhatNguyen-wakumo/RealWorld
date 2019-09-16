@@ -1,23 +1,19 @@
 import React, { Component } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
-  TextInput,
-  Button,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
   FlatList,
   AsyncStorage,
-  ImageBackground
+  TextInput
 } from "react-native";
-import { createStackNavigator, createAppContainer } from "react-navigation";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import Firebase from "react-native-firebase";
 import { ChatLineHolder } from "./ChatLineHolder";
+import firebase from "react-native-firebase";
 
 export default class ChatTab extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       chatData: [],
       chatInputContent: "",
@@ -27,27 +23,37 @@ export default class ChatTab extends Component {
   static navigationOptions = {
     title: "Chat Room"
   };
+
   async componentDidMount() {
-    let username = await AsyncStorage.getItem("name");
+    let username = await AsyncStorage.getItem("ID");
     this.setState({ username });
     firebase
       .database()
-      .ref("/chatTab")
+      .ref("/chatRoom")
+
       .on("value", snapshot => {
         if (snapshot.val() !== undefined && snapshot.val() !== null) {
+          console.log("==> data", Object.values(snapshot.val()));
+          console.log("==> data", snapshot.val());
+          const chatData = [];
+          snapshot.forEach(element => {
+            chatData.push(element.val());
+          });
           this.setState({
-            chatData: Object.values(snapshot.val())
+            chatData
           });
         }
       });
   }
 
   _sendMessage = () => {
-    Firebase.database()
-      .ref("/chatTab")
+    firebase
+      .database()
+      .ref("/chatRoom")
       .push({
         userName: this.state.username,
-        chatContent: this.state.chatInputContent
+        chatContent: this.state.chatInputContent,
+        createdAt: new Date().getTime()
       });
     this.setState({
       chatInputContent: ""
@@ -62,7 +68,7 @@ export default class ChatTab extends Component {
     if (item.userName === this.state.username) {
       return (
         <View style={{ alignItems: "flex-end" }}>
-          <ChatLineHolder sender="YOU" chatContent={item.chatContent} />
+          <ChatLineHolder sender="You" chatContent={item.chatContent} />
         </View>
       );
     }
@@ -70,7 +76,6 @@ export default class ChatTab extends Component {
       <ChatLineHolder sender={item.userName} chatContent={item.chatContent} />
     );
   };
-
   render() {
     return (
       <View
@@ -87,8 +92,10 @@ export default class ChatTab extends Component {
           }}
         >
           <FlatList
+            ref={ref => (this.flatlist = ref)}
             data={this.state.chatData}
             renderItem={({ item }, index) => this._renderChatLine(item)}
+            onContentSizeChange={() => this.flatlist.scrollToEnd()}
           />
         </ImageBackground>
         <View style={{ flex: 1 / 10 }}>
@@ -105,7 +112,7 @@ export default class ChatTab extends Component {
           >
             <View style={{ flex: 8 / 10 }}>
               <TextInput
-                placeholder="Enter content here"
+                placeholder="Enter content"
                 value={this.state.chatInputContent}
                 onChangeText={text => this._onChangeChatInput(text)}
                 style={{ height: 100, fontSize: 18 }}

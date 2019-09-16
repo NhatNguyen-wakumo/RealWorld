@@ -34,7 +34,8 @@ export default class AccountTab extends Component {
       typedPassword: "",
       emails: [],
       newResult: [],
-      lists: []
+      lists: [],
+      mail: ""
     };
     this.ref = firebase.firestore().collection("emails");
   }

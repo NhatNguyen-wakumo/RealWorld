@@ -33,13 +33,15 @@ export default class AccountTab extends Component {
       results: [],
       typedPassword: "",
       emails: [],
-      newResult: []
+      newResult: [],
+      mail: ""
     };
     const { navigation } = props;
     this.user = navigation.getParam("user", {});
     this.ref = firebase.firestore().collection("emails");
 
     const passEmail = this.props.navigation.state.params.email;
+    console.log(passEmail);
   }
 
   componentWillMount() {
@@ -70,7 +72,8 @@ export default class AccountTab extends Component {
   }
 
   static navigationOptions = {
-    title: "Home"
+    title: "Home",
+    headerLeft: null
   };
 
   onSignout = () => {
@@ -78,11 +81,16 @@ export default class AccountTab extends Component {
     this.props.navigation.navigate("Login");
   };
 
-  onChat = () => {
-    this.props.navigation.navigate("ChatList"),
-      {
-        mail: this.passEmail
-      };
+  toChatRoom = () => {
+    this.ref.get().then(snapshot => {
+      snapshot.docs.forEach(doc => {
+        if (doc.data().newEmail === this.props.navigation.state.params.email) {
+          AsyncStorage.setItem("ID", doc.data().newNickname);
+          console.log(doc.data().newNickname);
+          this.props.navigation.navigate("Chat");
+        }
+      });
+    });
   };
 
   render() {
@@ -132,10 +140,7 @@ export default class AccountTab extends Component {
           >
             <Text style={styles.titleMid}>Friend List</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            // onPress={() => this.props.navigation.navigate("ChatList")}
-            onPress={this.onChat}
-          >
+          <TouchableOpacity onPress={() => this.toChatRoom()}>
             <Text style={styles.titleMid}>Chat</Text>
           </TouchableOpacity>
           <FlatList

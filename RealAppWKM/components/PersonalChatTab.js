@@ -11,13 +11,12 @@ import {
 } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Firebase from "react-native-firebase";
+import firebase from "react-native-firebase";
 import { ChatLineHolder } from "./ChatLineHolder";
 
-export default class ChatTab extends Component {
+export default class PersonalChatTab extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       chatData: [],
       chatInputContent: "",
@@ -27,10 +26,12 @@ export default class ChatTab extends Component {
   static navigationOptions = {
     title: "Chat Room"
   };
+
   async componentDidMount() {
     let username = await AsyncStorage.getItem("name");
     this.setState({ username });
-    Firebase.database()
+    firebase
+      .database()
       .ref("/chatTab")
       .on("value", snapshot => {
         if (snapshot.val() !== undefined && snapshot.val() !== null) {
@@ -42,7 +43,8 @@ export default class ChatTab extends Component {
   }
 
   _sendMessage = () => {
-    Firebase.database()
+    firebase
+      .database()
       .ref("/chatTab")
       .push({
         userName: this.state.username,

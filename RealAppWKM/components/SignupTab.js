@@ -54,9 +54,9 @@ export default class SignupTab extends Component {
     if (this.state.newUserName.trim() === "") {
       alert("User name is blank");
     } else if (this.state.newUserGender.trim() === "") {
-      alert("User gender is blank");
+      alert("User nickname is blank");
     } else if (this.state.newUserAge.trim() === "") {
-      alert("User age is blank");
+      alert("User phone is blank");
     } else if (this.state.newUserEmail.trim() === "") {
       alert("User email is blank");
     } else if (this.state.newUserPassword.trim() === "") {
@@ -71,8 +71,6 @@ export default class SignupTab extends Component {
         .then(loggedInUser => {
           this.setState({ user: loggedInUser });
           alert(`Register successfully`);
-        })
-        .then(() => {
           this.props.navigation.navigate("Login");
         })
         .catch(error => {
@@ -113,7 +111,6 @@ export default class SignupTab extends Component {
         userEmail: this.state.newUserEmail,
         userPassword: this.state.newUserPassword
       });
-      this.props.navigation.navigate("Login");
     }
   };
 

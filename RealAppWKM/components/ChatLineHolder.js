@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 
 export const ChatLineHolder = props => {
+  //const Time = props.chatContent.sort(byda)
   return (
     <View
       style={{

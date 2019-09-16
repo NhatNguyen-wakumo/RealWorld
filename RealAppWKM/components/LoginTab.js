@@ -10,8 +10,8 @@ export default class LoginTab extends Component {
     super(props);
     this.unsubcriber = null;
     this.state = {
-      typedEmail: "thainguyen@wkm.vn",
-      typedPassword: "thainguyen",
+      typedEmail: "",
+      typedPassword: "",
       user: null,
       users: [],
       newUserName: "",
